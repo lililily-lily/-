@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>拼接长图</title>
+</head>
+<body>
+    <input type="file" id="fileInput" multiple>
+    <button onclick="mergeImages()">拼接图片</button>
+    <canvas id="canvas"></canvas>
+
+    <script>
+        function mergeImages() {
+            const input = document.getElementById('fileInput');
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            const files = input.files;
+            const images = [];
+            let totalHeight = 0;
+
+            const loadImage = (file) => {
+                return new Promise((resolve) => {
+                    const img = new Image();
+                    img.src = URL.createObjectURL(file);
+                    img.onload = () => resolve(img);
+                });
+            };
+
+            Promise.all(Array.from(files).map(loadImage)).then((loadedImages) => {
+                loadedImages.forEach(img => {
+                    images.push(img);
+                    totalHeight += img.height;
+                });
+
+                canvas.width = Math.max(...images.map(img => img.width));
+                canvas.height = totalHeight;
+                let y = 0;
+                images.forEach(img => {
+                    ctx.drawImage(img, 0, y);
+                    y += img.height;
+                });
+            });
+        }
+    </script>
+</body>
+</html>
